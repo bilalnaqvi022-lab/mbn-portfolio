@@ -4,16 +4,6 @@ export async function onRequestPost(context) {
 
     const body = await request.json();
 
-    console.log("BODY:", body);
-    console.log("API KEY EXISTS:", !!env.ANTHROPIC_API_KEY);
-
-    if (!env.ANTHROPIC_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Missing API Key in Cloudflare env" }),
-        { status: 500 }
-      );
-    }
-
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -31,9 +21,15 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" }
-    });
+    const text =
+      data?.content?.[0]?.text ||
+      data?.error?.message ||
+      "No response";
+
+    return new Response(
+      JSON.stringify({ reply: text }),
+      { headers: { "Content-Type": "application/json" } }
+    );
 
   } catch (err) {
     return new Response(
