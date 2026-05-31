@@ -1,8 +1,8 @@
 export async function onRequestPost(context) {
-  const { request, env } = context;
-
   try {
-    const { messages, system } = await request.json();
+    const { request, env } = context;
+
+    const { system, messages } = await request.json();
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -26,9 +26,8 @@ export async function onRequestPost(context) {
     });
 
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500
+    });
   }
 }
