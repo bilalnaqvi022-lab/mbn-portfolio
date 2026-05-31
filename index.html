@@ -1152,13 +1152,15 @@ Keep responses concise (2-4 sentences usually), friendly, and on-topic. If asked
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+        body: JSON.stringify({
         system: SYSTEM,
-      messages: history
-      })
-        });
-      const data = await res.json();
-      console.log(data.reply);
+        messages: history
+        })});
+          const data = await res.json();
+          console.log("BACKEND RESPONSE:", data);
+        if (data.error) {
+          alert(data.error);
+        }
       hideTyping();
 
       const reply = data?.content?.[0]?.text || "Sorry, I couldn't get a response. Try again!";
