@@ -4,8 +4,15 @@ export async function onRequestPost(context) {
 
     const body = await request.json();
 
-    const messages = body.messages || [];
-    const system = body.system || "You are a helpful assistant about Bilal.";
+    console.log("BODY:", body);
+    console.log("API KEY EXISTS:", !!env.ANTHROPIC_API_KEY);
+
+    if (!env.ANTHROPIC_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "Missing API Key in Cloudflare env" }),
+        { status: 500 }
+      );
+    }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -17,20 +24,14 @@ export async function onRequestPost(context) {
       body: JSON.stringify({
         model: "claude-3-5-sonnet-20240620",
         max_tokens: 800,
-        system,
-        messages
+        system: body.system || "You are helpful.",
+        messages: body.messages || []
       })
     });
 
     const data = await response.json();
 
-    // IMPORTANT: return only text safely
-    const text =
-      data?.content?.[0]?.text ||
-      data?.error?.message ||
-      "No response from Claude";
-
-    return new Response(JSON.stringify({ reply: text }), {
+    return new Response(JSON.stringify(data), {
       headers: { "Content-Type": "application/json" }
     });
 
